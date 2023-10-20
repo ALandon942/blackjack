@@ -1,0 +1,24 @@
+Classes:
+ Card
+ - values etc
+ - ace?
+   - can start at 11 and be switched to 1 if hand at risk of bust
+ Deck
+ - generating all cards
+ - shuffling etc
+ - dealing
+ Hand
+ - rules about bust, victory, etc.
+ - switching the value of ace
+ Kitty
+ - add
+ - subtract
+ - hit zero
+ AbstractPlayer for behavior in common between player & dealer: hitting/staying, betting, etc.
+ - Player
+   - prompting for next move
+   - finite kitty
+ - Dealer
+   - automatically hitting to beat player
+   - need not actually have and deal from deck
+   - infinite kitty
