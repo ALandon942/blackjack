@@ -1,5 +1,5 @@
 import unittest
-from main import Card, Shoe, Hand, BLACKJACK
+from main import Card, Shoe, Hand, LIMIT
 
 
 class CardTest(unittest.TestCase):
@@ -83,34 +83,34 @@ class HandTest(unittest.TestCase):
     def test_init(self):
         hand = Hand()
         self.assertEqual(0, hand.total())
-        self.assertFalse(hand.blackjack, "Blackjack on empty hand!")
-        self.assertFalse(hand.bust, "Bust on empty hand!")
+        self.assertFalse(hand.is_blackjack(), "Blackjack on empty hand!")
+        self.assertFalse(hand.is_bust(), "Bust on empty hand!")
 
     def test_add_one(self):
         card = Card("Hearts", "Four")
         hand = self.build_hand((card,))
         self.assertEqual(card.value(), hand.total())
-        self.assertFalse(hand.blackjack, "Blackjack reached prematurely")
-        self.assertFalse(hand.bust, "Bust reached prematurely")
+        self.assertFalse(hand.is_blackjack(), "Blackjack declared falsely")
+        self.assertFalse(hand.is_bust(), "Bust reached prematurely")
 
-    def test_natural_blackjack(self):
+    def test_blackjack(self):
         hand = self.build_hand([Card("Diamonds", "King"), Card("Spades", "Ace")])
-        self.assertEqual(BLACKJACK, hand.total())
-        self.assertTrue(hand.blackjack, "Failed to detect blackjack")
-        self.assertFalse(hand.bust, "Blackjack mistaken for bust")
+        self.assertEqual(LIMIT, hand.total())
+        self.assertTrue(hand.is_blackjack(), "Failed to detect blackjack")
+        self.assertFalse(hand.is_bust(), "Blackjack mistaken for bust")
 
-    def test_blackjack_after_hit(self):
+    def test_21_with_ace_switch(self):
         hand = self.build_hand(
             [Card("Diamonds", "Six"), Card("Spades", "Ace"), Card("Clubs", "Five"), Card("Diamonds", "Nine")])
-        self.assertEqual(BLACKJACK, hand.total())
-        self.assertTrue(hand.blackjack, "Failed to detect blackjack")
-        self.assertFalse(hand.bust, "Blackjack mistaken for bust")
+        self.assertEqual(LIMIT, hand.total())
+        self.assertFalse(hand.is_blackjack(), "Non-blackjack 21 mistaken for blackjack")
+        self.assertFalse(hand.is_bust(), "21 mistaken for bust")
 
     def test_bust(self):
         hand = self.build_hand([Card("Diamonds", "Ten"), Card("Hearts", "Seven"), Card("Hearts", "Five")])
-        self.assertGreater(hand.total(), BLACKJACK)
-        self.assertFalse(hand.blackjack, "Bust mistaken for blackjack")
-        self.assertTrue(hand.bust, "Failed to detect bust")
+        self.assertGreater(hand.total(), LIMIT)
+        self.assertFalse(hand.is_blackjack(), "Bust mistaken for blackjack")
+        self.assertTrue(hand.is_bust(), "Failed to detect bust")
 
 
 if __name__ == "__main__":

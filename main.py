@@ -1,6 +1,6 @@
 from random import shuffle
 
-BLACKJACK = 21
+LIMIT = 21
 
 
 class Card:
@@ -52,8 +52,6 @@ class Shoe:
 class Hand:
     def __init__(self):
         self.cards = []
-        self.bust = False
-        self.blackjack = False
 
     def total(self):
         amount = 0
@@ -61,13 +59,15 @@ class Hand:
             amount += card.value()
         return amount
 
+    def is_bust(self):
+        return self.total() > LIMIT
+
+    def is_blackjack(self):
+        return len(self.cards) == 2 and self.total() == LIMIT
+
     def add(self, card):
         self.cards.append(card)
-        if self.total() > BLACKJACK:
+        if self.total() > LIMIT:
             # see if revaluing any aces will save us
             for card in self.cards:
                 card.switch_values()
-        if self.total() > BLACKJACK:
-            self.bust = True
-        if self.total() == BLACKJACK:
-            self.blackjack = True

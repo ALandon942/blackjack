@@ -11,15 +11,25 @@ Classes:
  Hand
  - rules about bust, victory, etc.
  - switching the value of ace
- Kitty
+ Bankroll (for individual player)
  - add
  - subtract
  - hit zero
+ Kitty (all players' bets on one round)
+ - Rules state every player who beats the dealer wins what they bet EXCEPT those with blackjack get 1.5x what they bet (in addition to recovering their bet)
+ - The idea of a kitty maybe doesn't apply to this game since 1) dealer's winnings are effectively ignored 2) dealer's payout is not known til end of round
+ - Individual bets are more of a useful class instead
+ Bet (one player's bet)
+ - initialize with value
+   - validate against bankroll
+ - apply(hand, bankroll)
+   - subtract for loss
+   - add for win
  AbstractPlayer for behavior in common between player & dealer: hitting/staying, betting, etc.
  - Player
    - prompting for next move
-   - finite kitty
+   - finite bankroll
  - Dealer
    - automatically hitting to beat player
    - need not actually have and deal from deck
-   - infinite kitty
+   - infinite bankroll
