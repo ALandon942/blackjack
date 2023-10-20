@@ -1,5 +1,5 @@
 import unittest
-from main import Card, Shoe
+from main import Card, Shoe, Hand, BLACKJACK
 
 
 class CardTest(unittest.TestCase):
@@ -70,6 +70,48 @@ class DeckTest(unittest.TestCase):
         shoe.put_back(discard)
         self.assertEqual(full, len(shoe.cards))
         # not going to test reshuffling
+
+
+class HandTest(unittest.TestCase):
+    @staticmethod
+    def build_hand(cards):
+        hand = Hand()
+        for card in cards:
+            hand.add(card)
+        return hand
+
+    def test_init(self):
+        hand = Hand()
+        self.assertEqual(0, hand.total())
+        self.assertFalse(hand.blackjack, "Blackjack on empty hand!")
+        self.assertFalse(hand.bust, "Bust on empty hand!")
+
+    def test_add_one(self):
+        card = Card("Hearts", "Four")
+        hand = self.build_hand((card,))
+        self.assertEqual(card.value(), hand.total())
+        self.assertFalse(hand.blackjack, "Blackjack reached prematurely")
+        self.assertFalse(hand.bust, "Bust reached prematurely")
+
+    def test_natural_blackjack(self):
+        hand = self.build_hand([Card("Diamonds", "King"), Card("Spades", "Ace")])
+        self.assertEqual(BLACKJACK, hand.total())
+        self.assertTrue(hand.blackjack, "Failed to detect blackjack")
+        self.assertFalse(hand.bust, "Blackjack mistaken for bust")
+
+    def test_blackjack_after_hit(self):
+        hand = self.build_hand(
+            [Card("Diamonds", "Six"), Card("Spades", "Ace"), Card("Clubs", "Five"), Card("Diamonds", "Nine")])
+        self.assertEqual(BLACKJACK, hand.total())
+        self.assertTrue(hand.blackjack, "Failed to detect blackjack")
+        self.assertFalse(hand.bust, "Blackjack mistaken for bust")
+
+    def test_bust(self):
+        hand = self.build_hand([Card("Diamonds", "Ten"), Card("Hearts", "Seven"), Card("Hearts", "Five")])
+        self.assertGreater(hand.total(), BLACKJACK)
+        self.assertFalse(hand.blackjack, "Bust mistaken for blackjack")
+        self.assertTrue(hand.bust, "Failed to detect bust")
+
 
 if __name__ == "__main__":
     unittest.main()

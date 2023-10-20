@@ -1,5 +1,7 @@
 from random import shuffle
 
+BLACKJACK = 21
+
 
 class Card:
     suits = {'Clubs', 'Diamonds', 'Hearts', 'Spades'}
@@ -47,3 +49,25 @@ class Shoe:
         shuffle(self.cards)
 
 
+class Hand:
+    def __init__(self):
+        self.cards = []
+        self.bust = False
+        self.blackjack = False
+
+    def total(self):
+        amount = 0
+        for card in self.cards:
+            amount += card.value()
+        return amount
+
+    def add(self, card):
+        self.cards.append(card)
+        if self.total() > BLACKJACK:
+            # see if revaluing any aces will save us
+            for card in self.cards:
+                card.switch_values()
+        if self.total() > BLACKJACK:
+            self.bust = True
+        if self.total() == BLACKJACK:
+            self.blackjack = True
