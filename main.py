@@ -3,9 +3,10 @@ from random import shuffle
 
 class Card:
     suits = {'Clubs', 'Diamonds', 'Hearts', 'Spades'}
-    ranks = {'Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Jack', 'Queen', 'King'}
+    ranks = {'Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King'}
     values = {'Ace': (11, 1), 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6, 'Seven': 7, 'Eight': 8, 'Nine': 9,
-              'Jack': 10, 'Queen': 10, 'King': 10}
+              'Ten': 10, 'Jack': 10, 'Queen': 10, 'King': 10}
+
     # values of ace are handled in the order they'll be used
 
     def __init__(self, suit, rank):
@@ -29,5 +30,20 @@ class Card:
 
     def __str__(self):
         return f'{self.rank} of {self.suit}'
+
+
+class Shoe:
+    # Future enhancement: multiple decks in shoe
+    def __init__(self):
+        self.cards = [Card(suit, rank) for suit in Card.suits for rank in Card.ranks]
+        shuffle(self.cards)
+
+    def hit(self):  # Stop hitting yourself! *rimshot*
+        return self.cards.pop(0)
+
+    def put_back(self, cards):
+        # To simplify the logic we'll assume shuffling is continuous
+        self.cards.extend(cards)
+        shuffle(self.cards)
 
 

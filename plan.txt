@@ -3,10 +3,11 @@ Classes:
  - values etc
  - ace?
    - can start at 11 and be switched to 1 if hand at risk of bust
- Deck
+ Deck (or shoe)
  - generating all cards
  - shuffling etc
  - dealing
+ - returning cards and reshuffling
  Hand
  - rules about bust, victory, etc.
  - switching the value of ace

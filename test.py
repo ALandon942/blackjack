@@ -1,5 +1,5 @@
 import unittest
-from main import Card
+from main import Card, Shoe
 
 
 class CardTest(unittest.TestCase):
@@ -32,6 +32,44 @@ class CardTest(unittest.TestCase):
         ace.switch_values()
         self.assertGreater(ace.value(), 1)  # switching extra mustn't undo a bust
 
+
+class DeckTest(unittest.TestCase):
+    cards_in_order = [Card(suit, rank) for suit in Card.suits for rank in Card.ranks]
+
+    def test_card_generation(self):
+        deck = Shoe()
+
+        def comparison_set(cards):
+            return {(card.suit, card.rank) for card in cards}
+
+        self.assertEqual(len(deck.cards), 52)
+        self.assertEqual(comparison_set(self.cards_in_order), comparison_set(deck.cards))
+
+    def test_shuffle_on_init(self):
+        shoe = Shoe()
+
+        def comparison_list(cards):
+            return [(card.suit, card.rank) for card in cards]
+
+        self.assertNotEqual(comparison_list(self.cards_in_order), comparison_list(shoe.cards), "Deck is not shuffled")
+
+    def test_hit(self):
+        shoe = Shoe()
+        full = len(shoe.cards)
+        top_card = shoe.cards[0]
+        dealt_card = shoe.hit()
+        self.assertEqual((top_card.suit, top_card.rank), (dealt_card.suit, dealt_card.rank))
+        self.assertEqual(full - 1, len(shoe.cards))
+
+    def test_put_back(self):
+        shoe = Shoe()
+        full = len(shoe.cards)
+        discard = []
+        for i in range(0, 10):
+            discard.append(shoe.hit())
+        shoe.put_back(discard)
+        self.assertEqual(full, len(shoe.cards))
+        # not going to test reshuffling
 
 if __name__ == "__main__":
     unittest.main()
