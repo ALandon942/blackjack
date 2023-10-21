@@ -1,5 +1,5 @@
 import unittest
-from main import Card, Shoe, Hand, LIMIT
+from main import Card, Shoe, Hand, LIMIT, Bankroll, Bet
 
 
 class CardTest(unittest.TestCase):
@@ -143,6 +143,69 @@ class HandTest(unittest.TestCase):
         self.assertLess(hand1.compare(hand2), 0)
         self.assertGreater(hand2.compare(hand1), 0)
         self.assertEqual(0, hand1.compare(hand1))
+
+
+class BankrollTest(unittest.TestCase):
+    def test_init(self):
+        bankroll = Bankroll(500)
+        self.assertEqual(500, bankroll.amount)
+
+    def test_add(self):
+        bankroll = Bankroll(500)
+        self.assertEqual(501, bankroll.add(1))
+        self.assertEqual(501, bankroll.amount)
+
+    def test_subtract(self):
+        bankroll = Bankroll(500)
+        self.assertEqual(0, bankroll.subtract(500))
+        self.assertEqual(0, bankroll.amount)
+
+    def test_overdraw(self):
+        bankroll = Bankroll(500)
+        try:
+            bankroll.subtract(501)
+        except ValueError:
+            pass
+        else:
+            self.fail("ValueError not raised on overdraft")
+        self.assertEqual(500, bankroll.amount)
+
+    def test_bet(self):
+        bankroll = Bankroll(500)
+        bet = bankroll.place_bet(50)
+        self.assertEqual(bet.amount, 50)
+        self.assertEqual(450, bankroll.amount)
+
+    def test_overdraft_bet(self):
+        bankroll = Bankroll(500)
+        try:
+            bet = bankroll.place_bet(600)
+        except ValueError:
+            pass
+        else:
+            self.fail("Excessive bet placed")
+
+    class BetTest(unittest.TestCase):
+        def test_init(self):
+            bet = Bet(50)
+            self.assertEqual(50, bet.amount)
+
+        def test_win(self):
+            bet = Bet(50)
+            bet.win(0.5)
+            self.assertEqual(75, bet.amount)
+
+        def test_lose(self):
+            bet = Bet(50)
+            bet.lose()
+            self.assertEqual(0, bet.amount)
+
+        def test_pay_out(self):
+            bet = Bet(50)
+            bankroll = Bankroll()
+            bet.pay_out(bankroll)
+            self.assertEqual(0, bet.amount)
+            self.assertEqual(50, bankroll.amount)
 
 
 if __name__ == "__main__":

@@ -26,6 +26,8 @@ Classes:
  - apply(hand, bankroll)
    - subtract for loss
    - add for win
+ The below may not be necessary because the game's logic will include all this behavior and dealer/player really don't have a lot in common - maybe they can just be functions
+ However a player object without much behavior may still be useful to hold all the game objects relevant to that player
  AbstractPlayer for behavior in common between player & dealer: hitting/staying, betting, etc.
  - Player
    - prompting for next move

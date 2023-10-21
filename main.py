@@ -96,3 +96,41 @@ class Hand:
             else:
                 return self.total() - other.total()
 
+
+class Bankroll:
+    def __init__(self, amount=0):
+        self.amount = amount
+
+    def add(self, amount):
+        self.amount += amount
+        return self.amount
+
+    def subtract(self, amount):
+        if self.amount < amount:
+            raise ValueError(f'Can\'t subtract {amount} from balance of {self.amount}')
+        else:
+            self.amount -= amount
+        return self.amount
+
+    def place_bet(self, amount):
+        self.subtract(amount)
+        return Bet(amount)
+
+
+class Bet:
+    def __init__(self, stake):
+        self.amount = stake
+
+    def win(self, odds):
+        winnings = self.amount * odds
+        self.amount += winnings
+
+    def lose(self):
+        self.amount = 0
+
+    def pay_out(self, bankroll):
+        payout = self.amount
+        bankroll.add(payout)
+        self.amount = 0
+        return payout
+
