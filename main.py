@@ -71,3 +71,28 @@ class Hand:
             # see if revaluing any aces will save us
             for card in self.cards:
                 card.switch_values()
+
+    def compare(self, other):
+        """
+        Test how this hand compares to another.
+        :param other: another hand
+        :return: negative if this hand loses to other, 0 if they're tied, and positive if this hand beats other
+        """
+        if self.is_bust():
+            if other.is_bust():
+                return 0
+            else:
+                return -1
+        elif self.is_blackjack():
+            if other.is_blackjack():
+                return 0
+            else:
+                return 1
+        else:
+            if other.is_bust():
+                return 1
+            elif other.is_blackjack():
+                return -1
+            else:
+                return self.total() - other.total()
+

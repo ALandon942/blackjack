@@ -11,6 +11,7 @@ Classes:
  Hand
  - rules about bust, victory, etc.
  - switching the value of ace
+ - compare to other hand
  Bankroll (for individual player)
  - add
  - subtract

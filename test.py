@@ -112,6 +112,38 @@ class HandTest(unittest.TestCase):
         self.assertFalse(hand.is_blackjack(), "Bust mistaken for blackjack")
         self.assertTrue(hand.is_bust(), "Failed to detect bust")
 
+    def test_compare_one_blackjack(self):
+        hand1 = self.build_hand([Card("Diamonds", "Ace"), Card("Diamonds", "King")])
+        # Make the other hand a plain old 21 to assert that blackjack beats it:
+        hand2 = self.build_hand([Card("Hearts", "Nine"), Card("Clubs", "Nine"), Card("Clubs", "Three")])
+        self.assertGreater(hand1.compare(hand2), 0)
+        self.assertLess(hand2.compare(hand1), 0)
+
+    def test_compare_two_blackjacks(self):
+        hand1 = self.build_hand([Card("Diamonds", "Ace"), Card("Diamonds", "King")])
+        hand2 = self.build_hand([Card("Spades", "Ace"), Card("Clubs", "Ten")])
+        self.assertEqual(0, hand1.compare(hand2))
+        self.assertEqual(0, hand2.compare(hand1))
+
+    def test_compare_one_bust(self):
+        hand1 = self.build_hand([Card("Hearts", "Nine"), Card("Clubs", "Nine"), Card("Clubs", "Four")])
+        hand2 = self.build_hand([Card("Hearts", "Four"), Card("Clubs", "Two")])
+        self.assertLess(hand1.compare(hand2), 0)
+        self.assertGreater(hand2.compare(hand1), 0)
+
+    def test_compare_two_busts(self):
+        hand1 = self.build_hand([Card("Hearts", "Nine"), Card("Clubs", "Nine"), Card("Clubs", "Four")])
+        hand2 = self.build_hand([Card("Spades", "King"), Card("Spades", "Ten"), Card("Diamonds", "Six")])
+        self.assertEqual(0, hand1.compare(hand2))
+        self.assertEqual(0, hand2.compare(hand1))
+
+    def test_compare_no_blackjack_or_bust(self):
+        hand1 = self.build_hand([Card("Hearts", "Nine"), Card("Clubs", "Four")])
+        hand2 = self.build_hand([Card("Spades", "King"), Card("Diamonds", "Six")])
+        self.assertLess(hand1.compare(hand2), 0)
+        self.assertGreater(hand2.compare(hand1), 0)
+        self.assertEqual(0, hand1.compare(hand1))
+
 
 if __name__ == "__main__":
     unittest.main()
