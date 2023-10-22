@@ -1,6 +1,10 @@
 from random import shuffle
 
 LIMIT = 21
+STARTING_BANKROLL = 100.0
+BLACKJACK_BONUS_ODDS = 1.5
+EVEN_ODDS = 1
+DEALER_STAY_LIMIT = 17
 
 
 class Card:
@@ -134,3 +138,152 @@ class Bet:
         self.amount = 0
         return payout
 
+
+class Player:
+    def __init__(self, starting_bankroll=STARTING_BANKROLL):
+        self.bankroll = Bankroll(starting_bankroll)
+        self.bet = None
+        self.hand = None
+
+
+def prompt_for_bet(bankroll):
+    while True:
+        entry = input('Enter your bet or Q to quit ')
+        if entry.upper() == 'Q':
+            print('Bye!')
+            exit(0)
+        try:
+            return bankroll.place_bet(float(entry))
+        except ValueError:
+            print('Not a valid amount')
+
+
+def deal_in(shoe, player):
+    player.hand = deal(shoe)
+
+
+def deal(shoe):
+    hand = Hand()
+    for i in range(0, 2):
+        hand.add(shoe.draw())
+    return hand
+
+
+def format_hand(hand, hide_first_card=False):
+    card_strings = [str(card) for card in hand.cards]
+    if hide_first_card:
+        card_strings[0] = '?'
+    return ', '.join(card_strings)
+
+
+def prompt_hit_or_stay():
+    """
+    Prompt user to hit or stay.
+    :return: True if user opted to hit
+    """
+    entry = None
+    while entry is None:
+        entry = input('Hit or stay? (H/S) ').upper()
+        if entry not in ('H', 'S'):
+            entry = None
+            print('Not a valid entry')
+    return entry == 'H'
+
+
+def player_turn(shoe, hand):
+    # Dealing loop:
+    # Prompt stay or hit til valid answer
+    # Stop when player busts, hits limit or stays
+    if hand.is_blackjack():
+        print('Blackjack!')
+        hitting = False
+    else:
+        hitting = True
+    while hitting:
+        hitting = prompt_hit_or_stay()
+        if hitting:
+            hand.add(shoe.draw())
+            print('Your cards: ' + format_hand(hand))
+            if hand.is_bust():
+                print("Bust!")
+                hitting = False
+            elif hand.total() == LIMIT:
+                print(f'You reached {LIMIT}')
+                hitting = False
+
+
+def dealer_hits(hand):
+    total = hand.total()
+    if total < DEALER_STAY_LIMIT:
+        return True
+    elif total == DEALER_STAY_LIMIT:
+        # Dealer can draw on a "soft seventeen"
+        for card in hand.cards:
+            if card.value() == 11:
+                return True
+        return False
+    else:
+        return False
+
+
+def dealer_turn(shoe, hand):
+    # Reveal hidden card
+    print('Dealer cards: ' + format_hand(hand))
+    while dealer_hits(hand):
+        print('Dealer hits')
+        hand.add(shoe.draw())
+        print(format_hand(hand))
+    if hand.is_bust():
+        print('Dealer busts')
+    else:
+        print('Dealer stays')
+
+
+def settle_bet(player, dealer_hand):
+    # Compare hands
+    # Calculate bet value
+    # Pay out bet to player's payroll
+    outcome = player.hand.compare(dealer_hand)
+    if outcome > 0:
+        player.bet.win(BLACKJACK_BONUS_ODDS if player.hand.is_blackjack() else EVEN_ODDS)
+        print('You win!')
+    elif outcome < 0:
+        player.bet.lose()
+        print('You lose!')
+    else:
+        print('Standoff!')
+        pass  # player just gets their bet back
+    player.bet.pay_out(player.bankroll)
+    # ENHANCEMENT: if there exist options like split etc. then house recovers advantage by winning if both the dealer
+    # and the player bust
+
+
+def return_cards(shoe, hands):
+    for hand in hands:
+        shoe.put_back(hand.cards)
+        hand.cards = []
+
+
+def main():
+    player = Player()
+    shoe = Shoe()
+    # Main loop
+    while player.bankroll.amount > 0:
+        print(f'You have ${player.bankroll.amount:.2f}')
+        player.bet = prompt_for_bet(player.bankroll)
+        print(f'${player.bet.amount:.2f} is on the table.')
+        deal_in(shoe, player)
+        print('Your cards: ' + format_hand(player.hand))
+        dealer_hand = deal(shoe)
+        print('Dealer cards: ' + format_hand(dealer_hand, hide_first_card=True))
+        player_turn(shoe, player.hand)
+        dealer_turn(shoe, dealer_hand)
+        settle_bet(player, dealer_hand)
+        if player.bankroll.amount <= 0:
+            print('You are bankrupt! Game over')
+        else:
+            return_cards(shoe, (dealer_hand, player.hand))
+
+
+if __name__ == '__main__':
+    main()
