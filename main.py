@@ -40,7 +40,7 @@ class Shoe:
         self.cards = [Card(suit, rank) for suit in Card.suits for rank in Card.ranks]
         shuffle(self.cards)
 
-    def hit(self):  # Stop hitting yourself! *rimshot*
+    def draw(self):
         return self.cards.pop(0)
 
     def put_back(self, cards):

@@ -53,11 +53,11 @@ class DeckTest(unittest.TestCase):
 
         self.assertNotEqual(comparison_list(self.cards_in_order), comparison_list(shoe.cards), "Deck is not shuffled")
 
-    def test_hit(self):
+    def test_draw(self):
         shoe = Shoe()
         full = len(shoe.cards)
         top_card = shoe.cards[0]
-        dealt_card = shoe.hit()
+        dealt_card = shoe.draw()
         self.assertEqual((top_card.suit, top_card.rank), (dealt_card.suit, dealt_card.rank))
         self.assertEqual(full - 1, len(shoe.cards))
 
@@ -66,7 +66,7 @@ class DeckTest(unittest.TestCase):
         full = len(shoe.cards)
         discard = []
         for i in range(0, 10):
-            discard.append(shoe.hit())
+            discard.append(shoe.draw())
         shoe.put_back(discard)
         self.assertEqual(full, len(shoe.cards))
         # not going to test reshuffling
