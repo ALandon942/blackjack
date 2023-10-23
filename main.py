@@ -10,29 +10,16 @@ DEALER_STAY_LIMIT = 17
 class Card:
     suits = {'Clubs', 'Diamonds', 'Hearts', 'Spades'}
     ranks = {'Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King'}
-    values = {'Ace': (11, 1), 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6, 'Seven': 7, 'Eight': 8, 'Nine': 9,
+    values = {'Ace': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6, 'Seven': 7, 'Eight': 8, 'Nine': 9,
               'Ten': 10, 'Jack': 10, 'Queen': 10, 'King': 10}
-
-    # values of ace are handled in the order they'll be used
+    # aces valued at 11 will be handled separately when evaluating whole hand
 
     def __init__(self, suit, rank):
         self.suit = suit
         self.rank = rank
-        self._value_index = 0
 
     def value(self):
-        value = self.values[self.rank]
-        if isinstance(value, tuple):
-            return value[self._value_index]
-        else:
-            return value
-
-    def switch_values(self):
-        value = self.values[self.rank]
-        if isinstance(value, tuple):
-            self._value_index = (self._value_index + 1) % len(value)
-            # if we try to switch the ace while already bust, we'll wrap around to the higher value - keep running
-            # and stay bust
+        return self.values[self.rank]
 
     def __str__(self):
         return f'{self.rank} of {self.suit}'
@@ -57,11 +44,30 @@ class Hand:
     def __init__(self):
         self.cards = []
 
-    def total(self):
+    def total_and_ace_status(self):
+        """
+        Returns two values:
+        - total: the total value of the hand
+        - ace_status: true if this total includes any aces valued at 11
+        :return: tuple of (total, ace_status)
+        """
         amount = 0
+        ace_count = 0
+        ace_status = False
         for card in self.cards:
-            amount += card.value()
-        return amount
+            value = card.value()
+            amount += value
+            if card.rank == "Ace":
+                ace_count += 1
+        # Promote aces to 11 as long as it won't cause a bust:
+        for i in range(0, ace_count):
+            if amount + 10 <= LIMIT:
+                amount += 10
+                ace_status = True
+        return amount, ace_status
+
+    def total(self):
+        return self.total_and_ace_status()[0]
 
     def is_bust(self):
         return self.total() > LIMIT
@@ -71,10 +77,6 @@ class Hand:
 
     def add(self, card):
         self.cards.append(card)
-        if self.total() > LIMIT:
-            # see if revaluing any aces will save us
-            for card in self.cards:
-                card.switch_values()
 
     def compare(self, other):
         """
@@ -213,15 +215,12 @@ def player_turn(shoe, hand):
 
 
 def dealer_hits(hand):
-    total = hand.total()
+    total, ace_status = hand.total_and_ace_status()
     if total < DEALER_STAY_LIMIT:
         return True
     elif total == DEALER_STAY_LIMIT:
         # Dealer can draw on a "soft seventeen"
-        for card in hand.cards:
-            if card.value() == 11:
-                return True
-        return False
+        return ace_status
     else:
         return False
 

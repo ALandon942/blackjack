@@ -25,22 +25,7 @@ class CardTest(unittest.TestCase):
         face_card = Card("Spades", "Queen")
         self.assertEqual(10, face_card.value())
 
-    # Value of ace is tested with switch_value
-
-    def test_switch_normal_card_value(self):
-        normal_card = Card("Diamonds", "Two")
-        value_before = normal_card.value()
-        normal_card.switch_values()
-        value_after = normal_card.value()
-        self.assertEqual(value_before, value_after)
-
-    def test_switch_ace_value(self):
-        ace = Card("Clubs", "Ace")
-        self.assertEqual(11, ace.value())
-        ace.switch_values()
-        self.assertEqual(1, ace.value())
-        ace.switch_values()
-        self.assertGreater(ace.value(), 1)  # switching extra mustn't undo a bust
+    # ace value is covered by tests of hand totals
 
 
 class DeckTest(unittest.TestCase):
@@ -95,6 +80,11 @@ class HandTest(unittest.TestCase):
         self.assertEqual(card.value(), hand.total())
         self.assertFalse(hand.is_blackjack(), "Blackjack declared falsely")
         self.assertFalse(hand.is_bust(), "Bust reached prematurely")
+
+    def test_both_ace_values(self):
+        # Hand where a player gets the best outcome with one ace valued at 11 and the other at 1:
+        hand = build_hand([Card("Hearts", "Ace"), Card("Clubs", "Ace"), Card("Hearts", "Nine")])
+        self.assertEqual(21, hand.total())
 
     def test_blackjack(self):
         hand = build_hand([Card("Diamonds", "King"), Card("Spades", "Ace")])
